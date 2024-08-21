@@ -411,6 +411,18 @@ func (s *centOS) getRelease(URL, release, variant, arch string) (string, error) 
 		if err != nil {
 			return fmt.Errorf("Failed to get URL %q: %w", u, err)
 		}
+		s.logger.Info("Get iso from", u, " was code ", resp.StatusCode)
+
+		if resp.StatusCode == 403 {
+			// workaround for dir listing is denied at vault2.origin.centos.org/centos/7/isos/x86_64
+			// get README works because it contains iso file names
+			u_listing_file := u + "/0_README.txt"
+			resp, err = http.Get(u_listing_file)
+			if err != nil {
+				return fmt.Errorf("Failed to get URL %q: %w", u_listing_file, err)
+			}
+			s.logger.Info("Get iso from", u_listing_file, " was code ", resp.StatusCode)
+		}
 
 		return nil
 	}, 3)
@@ -424,6 +436,7 @@ func (s *centOS) getRelease(URL, release, variant, arch string) (string, error) 
 	if err != nil {
 		return "", fmt.Errorf("Failed to read body: %w", err)
 	}
+	s.logger.Info("Got body: ```", string(body), "```")
 
 	if len(releaseFields) == 3 && !strings.Contains(URL, "vault.centos.org") {
 		return "", errors.New("Patch releases are only supported when using vault.centos.org as the mirror")
