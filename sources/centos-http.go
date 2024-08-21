@@ -411,6 +411,14 @@ func (s *centOS) getRelease(URL, release, variant, arch string) (string, error) 
 		if err != nil {
 			return fmt.Errorf("Failed to get URL %q: %w", u, err)
 		}
+		if resp.StatusCode == 403 {
+			// workaround for dir listing is denied at vault2.origin.centos.org/centos/7/x86_64
+			// get README works because it contains iso file names
+			resp, err = http.Get(u + "/0_README.txt")
+			if err != nil {
+				return fmt.Errorf("Failed to get URL %q: %w", u, err)
+			}
+		}
 
 		return nil
 	}, 3)
