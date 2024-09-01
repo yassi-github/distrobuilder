@@ -26,6 +26,7 @@ It needs to be one of
 * `centos-http`
 * `debootstrap`
 * `docker-http`
+* `fedora-old-http`
 * `fedora-http`
 * `funtoo-http`
 * `gentoo-http`
